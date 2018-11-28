@@ -2,9 +2,9 @@
   "name": "techdegree-fullstackjs-rest-api",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
-    "start": "nodemon ./app.js",
+    "start": "nodemon ./server.js",
     "seed": "cross-env DB_ENABLE_LOGGING=true node './seed'"
   },
   "keywords": [],
@@ -14,10 +14,14 @@
     "nodemon": "^1.18.4"
   },
   "dependencies": {
+    "basic-auth": "^2.0.1",
+    "bcrypt": "^3.0.2",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.3",
     "cross-env": "^5.2.0",
     "express": "^4.16.4",
-    "mongodb": "^3.1.8",
+    "mongodb": "^3.1.10",
+    "mongoose": "^5.3.14",
     "morgan": "^1.9.1",
     "promise.prototype.finally": "^3.1.0"
   }
