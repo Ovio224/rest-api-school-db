@@ -23,23 +23,22 @@ mongoose.connect("mongodb://localhost:27017/fsjstd-restapi", {
 const db = mongoose.connection;
 
 db.on('error', (error) => {
-  console.log('An error occured, ' + error);
+  console.log('An error occured on the db, ' + error);
 });
 
 db.once('open', () => {
-  console.log('Connection successful');
+  console.log('Database - Connection successful');
 });
 
 
-// TODO setup api routes
+// api route
 const routes = require('./routes/api');
-
 app.use('/api', routes);
 
 // setup a friendly greeting for the root route
 app.get('/', (req, res) => {
   res.json({
-    message: 'Welcome to the REST API project!',
+    message: 'Welcome to my REST API project!',
   });
 });
 
@@ -62,7 +61,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// set our port
+// set port
 app.set('port', process.env.PORT || 5000);
 
 // start listening on our port

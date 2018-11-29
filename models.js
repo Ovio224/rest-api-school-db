@@ -7,7 +7,7 @@ const {
   Schema
 } = mongoose;
 
-// schemas
+// Schemas
 const UserSchema = new Schema({
   firstName: {
     type: String,
@@ -19,10 +19,13 @@ const UserSchema = new Schema({
   },
   emailAddress: {
     type: String,
-    required: [true, "The email is required!"],
+    required: [true, "Email address is required."],
     index: {
       unique: true
-    }
+    },
+    match: [/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+      'Please enter a valid email address.'
+    ], // email validation regex
   },
   password: {
     type: String,
@@ -47,6 +50,7 @@ const CourseSchema = new Schema({
   materialsNeeded: String
 });
 
+// hash the passwords before saving in db
 UserSchema.pre("save", function (next) {
   const user = this;
 
@@ -62,14 +66,6 @@ UserSchema.pre("save", function (next) {
     next();
   });
 });
-
-UserSchema.methods.comparePassword = function (usrPassword, callback) {
-  bcrypt.compare(usrPassword, this.password, function (err, isMatch) {
-    if(err) return callback(err);
-    callback(null, isMatch);
-  });
-}
-
 
 // models
 const User = mongoose.model("User", UserSchema);
