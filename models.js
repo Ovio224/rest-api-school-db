@@ -1,5 +1,6 @@
 'use strict';
 
+// dependencies
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 

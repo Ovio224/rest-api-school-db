@@ -16,15 +16,15 @@ function getAuth(req, res, next) {
       let isAuth;
       bcrypt.compare(auth(req).pass, users[0].password)
         .then((res) => {
-        isAuth = res;
-      }).then(() => {
-        if (isAuth) {
-          req.user = users[0];
-          next();
-        } else {
-          res.status(401).end();
-        }
-      }).catch(err => res.send(err));
+          isAuth = res;
+        }).then(() => {
+          if (isAuth) {
+            req.user = users[0];
+            next();
+          } else {
+            res.status(401).end();
+          }
+        }).catch(err => res.send(err));
     } else {
       res.status(401).end();
     }
@@ -34,7 +34,7 @@ function getAuth(req, res, next) {
 };
 
 
-// gets the course id
+// gets the course id -- one different way to approach this
 router.param('cID', (req, res, next, id) => {
   Course.findById(id, (err, course) => {
     if (err) return next(err);
@@ -105,10 +105,12 @@ router.put('/courses/:id', getAuth, (req, res) => {
   const query = {
     _id: req.params.id
   };
-  Course.findOneAndUpdate(query, req.body, (err, course) => {
+  Course.findById(query, (course) => {
+    console.log(course.user)
     if (course.user !== req.user._id) { // sends a 403 status code if the user doesn't own the course
       return res.status(403).end();
     }
+  }).then(Course.update(req.body, (err, course) => {
     if (err && err.name === "ValidationError") {
       res.status(400).send(err.errors)
     } else if (err) {
@@ -118,8 +120,12 @@ router.put('/courses/:id', getAuth, (req, res) => {
     }
   }).then((req, res) => {
     return res.status(204);
-  }).catch(err => res.send(err));
-});
+  }).catch(err => res.send(err)));
+  });
+//   Course.findOneAndUpdate(query, req.body, (err, course) => {
+
+
+// });
 
 // deletes a course
 router.delete('/courses/:id', getAuth, (req, res) => {
