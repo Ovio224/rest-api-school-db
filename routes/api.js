@@ -105,12 +105,10 @@ router.put('/courses/:id', getAuth, (req, res) => {
   const query = {
     _id: req.params.id
   };
-  Course.findById(query, (course) => {
-    console.log(course.user)
+  Course.findByIdAndUpdate(query, req.body, (err, course) => {
     if (course.user !== req.user._id) { // sends a 403 status code if the user doesn't own the course
       return res.status(403).end();
     }
-  }).then(Course.update(req.body, (err, course) => {
     if (err && err.name === "ValidationError") {
       res.status(400).send(err.errors)
     } else if (err) {
@@ -120,8 +118,8 @@ router.put('/courses/:id', getAuth, (req, res) => {
     }
   }).then((req, res) => {
     return res.status(204);
-  }).catch(err => res.send(err)));
-  });
+  }).catch(err => res.send(err));
+});
 //   Course.findOneAndUpdate(query, req.body, (err, course) => {
 
 
