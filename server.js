@@ -4,6 +4,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const jsonParser = require('body-parser').json;
+// const cors = require('cors');
 
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
@@ -11,12 +12,23 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 // create the Express app
 const app = express();
 
-// setup logger & parser
+// setup dependencies
 app.use(morgan('dev'));
 app.use(jsonParser());
 
-// link to database
+
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, PATCH, DELETE');
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  next()
+});
+
+
+// link to database // fix deprecation error
 const mongoose = require('mongoose');
+mongoose.set("useCreateIndex", true);
+mongoose.set("useFindAndModify", false);
 mongoose.connect("mongodb://localhost:27017/fsjstd-restapi", {
   useNewUrlParser: true
 });

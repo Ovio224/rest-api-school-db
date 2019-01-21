@@ -6,6 +6,8 @@ const User = require('../models').User;
 const Course = require('../models').Course;
 const auth = require('basic-auth');
 const bcrypt = require('bcrypt');
+// const cors = require('cors');
+
 
 // auth function
 function getAuth(req, res, next) {
@@ -105,40 +107,36 @@ router.put('/courses/:id', getAuth, (req, res) => {
   const query = {
     _id: req.params.id
   };
-  Course.findById(query, (course) => {
-    console.log(course.user)
-    if (course.user !== req.user._id) { // sends a 403 status code if the user doesn't own the course
+  Course.findById(query, (err, course) => {
+    if (course.user.toString() !== req.user._id.toString()) { // sends a 403 status code if the user doesn't own the course
       return res.status(403).end();
     }
-  }).then(Course.update(req.body, (err, course) => {
     if (err && err.name === "ValidationError") {
-      res.status(400).send(err.errors)
+      return res.status(400).send(err.errors)
     } else if (err) {
       return res.status(500).send(err);
     } else {
-      return res.status(204);
+      return course.updateOne(req.body, (err, course) => {
+        res.status(204).end();
+      });
     }
-  }).then((req, res) => {
-    return res.status(204);
-  }).catch(err => res.send(err)));
-  });
-//   Course.findOneAndUpdate(query, req.body, (err, course) => {
-
-
-// });
+  }).catch(err => console.log(err))
+});
 
 // deletes a course
 router.delete('/courses/:id', getAuth, (req, res) => {
   const query = {
     _id: req.params.id
   };
-  Course.findOneAndDelete(query, (err, course) => {
-    if (course.user !== req.user._id) { // sends a 403 status code if the user doesn't own the course
+  Course.findById(query, (err, course) => {
+    if (course.user.toString() !== req.user._id.toString()) { // sends a 403 status code if the user doesn't own the course
       return res.status(403).end();
     } else {
-      res.status(204);
+      return course.remove((err, course) => {
+        res.status(204).end();
+      });
     }
-  }).then(res => res.status(204)).catch(err => res.send(err));
+  }).catch(err => console.log(err))
 });
 
 module.exports = router;
