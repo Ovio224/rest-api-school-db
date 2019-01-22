@@ -6,11 +6,9 @@ const User = require('../models').User;
 const Course = require('../models').Course;
 const auth = require('basic-auth');
 const bcrypt = require('bcrypt');
-// const cors = require('cors');
-
 
 // auth function
-function getAuth(req, res, next) {
+const getAuth = (req, res, next) => {
   User.find({
     emailAddress: auth(req).name
   }).then((users) => {
@@ -19,21 +17,23 @@ function getAuth(req, res, next) {
       bcrypt.compare(auth(req).pass, users[0].password)
         .then((res) => {
           isAuth = res;
-        }).then(() => {
+        }).then((response) => {
           if (isAuth) {
             req.user = users[0];
+            res.locals.user = users[0];
             next();
           } else {
             res.status(401).end();
           }
-        }).catch(err => res.send(err));
+        }).catch(err => console.log(err));
     } else {
       res.status(401).end();
     }
   }).catch((err) => {
-    next(err);
+    res.send(err);
   });
-};
+}
+
 
 
 // gets the course id -- one different way to approach this
@@ -89,13 +89,13 @@ router.get('/courses/:cID', (req, res) => {
 });
 
 // post a new course
-router.post('/courses', getAuth, (req, res) => {
+router.post('/courses', getAuth, (req, res, next) => {
   Course.create(req.body, (err, course) => {
 
     if (err && err.name === "ValidationError") {
       res.status(400).send(err.errors)
     } else if (err) {
-      return res.status(500).send(err);
+      res.status(500).send(err);
     } else if (!err) {
       res.status(201).location(`/courses/${course._id}`).end();
     }
@@ -128,14 +128,15 @@ router.delete('/courses/:id', getAuth, (req, res) => {
   const query = {
     _id: req.params.id
   };
-  Course.findById(query, (err, course) => {
-    if (course.user.toString() !== req.user._id.toString()) { // sends a 403 status code if the user doesn't own the course
-      return res.status(403).end();
-    } else {
-      return course.remove((err, course) => {
-        res.status(204).end();
-      });
-    }
+  Course.findOne(query, (err, course) => {
+    // console.log(course.user, req.user._id)
+      if (course.user.toString() !== req.user._id.toString()) { // sends a 403 status code if the user doesn't own the course
+        return res.status(403).end();
+      } else {
+        return course.remove((err, course) => {
+          res.status(204).end();
+        });
+      }
   }).catch(err => console.log(err))
 });
 
